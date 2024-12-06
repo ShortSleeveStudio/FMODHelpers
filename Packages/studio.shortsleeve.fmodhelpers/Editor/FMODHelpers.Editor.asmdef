@@ -3,7 +3,8 @@
     "rootNamespace": "FMODHelpers.Editor",
     "references": [
         "GUID:188930bb567a54b4b98465bc006fc0fc",
-        "GUID:0c752da273b17c547ae705acf0f2adf2"
+        "GUID:0c752da273b17c547ae705acf0f2adf2",
+        "GUID:aab3caaf43456d6449a3e035348ff798"
     ],
     "includePlatforms": [
         "Editor"
