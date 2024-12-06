@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Cysharp.Threading.Tasks;
 using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
@@ -48,13 +47,22 @@ namespace FMODHelpers
             _activeInstances = new(UserDataPoolSize);
             _inactiveInstances = new(UserDataPoolSize);
             for (int i = 0; i < UserDataPoolSize; i++)
-                _inactiveInstances.Push(new FMODUserData(_releaseUserDataAction, _enqueueCallbackAction, destroyCancellationToken));
+                _inactiveInstances.Push(
+                    new FMODUserData(
+                        _releaseUserDataAction,
+                        _enqueueCallbackAction,
+                        destroyCancellationToken
+                    )
+                );
 
             // Bank Collection
             _banksPendingUnload = new();
 
             // Event Instance Pool
-            _eventInstanceDataPool = new(() => new EventInstanceData(), defaultCapacity: UserDataPoolSize);
+            _eventInstanceDataPool = new(
+                () => new EventInstanceData(),
+                defaultCapacity: UserDataPoolSize
+            );
         }
 
         void Update()
@@ -166,7 +174,8 @@ namespace FMODHelpers
         /// </summary>
         /// <param name="eventRef">Event to instantiate</param>
         /// <returns></returns>
-        public EventInstance GetEventInstance(FMODEventRef eventRef) => CreateEventInstance(eventRef);
+        public EventInstance GetEventInstance(FMODEventRef eventRef) =>
+            CreateEventInstance(eventRef);
 
         /// <summary>
         /// Create a new instance of a programmer sound.
@@ -175,7 +184,10 @@ namespace FMODHelpers
         /// <param name="dialogueTableKey">Key to look up the programmer sound</param>
         /// <param name="token">Cancellation token</param>
         /// <returns></returns>
-        public async UniTask<EventInstance> GetDialogueEventInstance(string dialogueTableKey, CancellationToken token)
+        public async Awaitable<EventInstance> GetDialogueEventInstance(
+            string dialogueTableKey,
+            CancellationToken token
+        )
         {
             // Return Value
             EventInstance eventInstance;
@@ -183,17 +195,21 @@ namespace FMODHelpers
 
             // Load Sound Path
             SOUND_INFO dialogueSoundInfo;
-            FMOD.RESULT keyResult = RuntimeManager.StudioSystem.getSoundInfo(dialogueTableKey, out dialogueSoundInfo);
+            FMOD.RESULT keyResult = RuntimeManager.StudioSystem.getSoundInfo(
+                dialogueTableKey,
+                out dialogueSoundInfo
+            );
             if (keyResult != FMOD.RESULT.OK)
             {
                 Debug.LogError($"Couldn't find dialogue with key: {dialogueTableKey}");
-                await UniTask.Yield(token);
+                await Awaitable.NextFrameAsync(token);
                 return eventInstance;
             }
 
             // Load Sound
             FMOD.Sound dialogueSound;
-            FMOD.MODE soundMode = FMOD.MODE.LOOP_NORMAL | FMOD.MODE.CREATECOMPRESSEDSAMPLE | FMOD.MODE.NONBLOCKING;
+            FMOD.MODE soundMode =
+                FMOD.MODE.LOOP_NORMAL | FMOD.MODE.CREATECOMPRESSEDSAMPLE | FMOD.MODE.NONBLOCKING;
 
             FMOD.RESULT soundResult = RuntimeManager.CoreSystem.createSound(
                 dialogueSoundInfo.name_or_data,
@@ -212,13 +228,23 @@ namespace FMODHelpers
             uint percentbuffered;
             bool starving;
             bool diskbusy;
-            dialogueSound.getOpenState(out openstate, out percentbuffered, out starving, out diskbusy);
+            dialogueSound.getOpenState(
+                out openstate,
+                out percentbuffered,
+                out starving,
+                out diskbusy
+            );
             float start = Time.unscaledTime;
             bool warningTriggered = false;
             while (openstate != FMOD.OPENSTATE.READY)
             {
-                await UniTask.Yield(token);
-                dialogueSound.getOpenState(out openstate, out percentbuffered, out starving, out diskbusy);
+                await Awaitable.NextFrameAsync(token);
+                dialogueSound.getOpenState(
+                    out openstate,
+                    out percentbuffered,
+                    out starving,
+                    out diskbusy
+                );
                 if (!warningTriggered && Time.unscaledTime - start > 2) // Warning if it takes longer than 2 seconds
                 {
                     Debug.LogWarning($"Loading {dialogueTableKey} is taking a long time...");
@@ -308,14 +334,17 @@ namespace FMODHelpers
                     return;
                 }
             }
-            throw new Exception($"Tried to decrement play count on an event that's not playing: {eventRef.Path}");
+            throw new Exception(
+                $"Tried to decrement play count on an event that's not playing: {eventRef.Path}"
+            );
         }
         #endregion
 
         #region Public Parameter API
         public void SetGlobalParameter(string name, float value) => SetParameter(name, value);
 
-        void SetParameter(string name, float value) => RuntimeManager.StudioSystem.setParameterByName(name, value);
+        void SetParameter(string name, float value) =>
+            RuntimeManager.StudioSystem.setParameterByName(name, value);
         #endregion
 
         #region Private API
