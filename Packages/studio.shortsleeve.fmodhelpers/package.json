@@ -9,9 +9,6 @@
   "unity": "2023.1",
   "description": "Code that helped ease the use of FMOD in Voodoo Detective.",
   "hideInEditor": false,
-  "dependencies": {
-    "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask"
-  },
   "keywords": [
     "sound",
     "fmod"
