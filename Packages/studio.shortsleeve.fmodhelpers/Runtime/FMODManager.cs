@@ -89,11 +89,11 @@ namespace FMODHelpers
         #endregion
 
         #region API
-        public void LoadBankAsync(FMODBankRef bankRef)
+        public void LoadBankAsync(FMODBankRef bankRef, bool loadSamples)
         {
             try
             {
-                RuntimeManager.LoadBank(bankRef.Name);
+                RuntimeManager.LoadBank(bankRef.Name, loadSamples);
             }
             catch (BankLoadException e)
             {
