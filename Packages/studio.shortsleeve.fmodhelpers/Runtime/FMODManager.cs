@@ -16,13 +16,14 @@ namespace FMODHelpers
         public const float MaxVolumeDBs = 10f;
         public const float MinVolumeDBs = -80f;
         public const string BusMaster = "bus:/";
-
-        private const int UserDataPoolSize = 32;
         #endregion
 
         #region Inspector
         [SerializeField]
         FMODEventRef dialogueEvent;
+
+        [SerializeField]
+        int initialInstancePoolSize = 32;
         #endregion
 
         #region State
@@ -31,8 +32,7 @@ namespace FMODHelpers
         List<FMODBankRef> _banksPendingUnload;
         Stack<FMODUserData> _inactiveInstances;
         Action<FMODUserData> _releaseUserDataAction;
-        Action<FMODCallback> _enqueueCallbackAction;
-        List<EventInstanceData> _activeInstances; // list to avoid alloc on iteration
+        List<EventInstanceData> _activeInstances; // maybe should be something other than a list
         ObjectPool<EventInstanceData> _eventInstanceDataPool;
         #endregion
 
@@ -44,16 +44,10 @@ namespace FMODHelpers
             _haveBanksLoaded = () => !IsAnyBankLoading();
 
             // Instance Collections
-            _activeInstances = new(UserDataPoolSize);
-            _inactiveInstances = new(UserDataPoolSize);
-            for (int i = 0; i < UserDataPoolSize; i++)
-                _inactiveInstances.Push(
-                    new FMODUserData(
-                        _releaseUserDataAction,
-                        _enqueueCallbackAction,
-                        destroyCancellationToken
-                    )
-                );
+            _activeInstances = new(initialInstancePoolSize);
+            _inactiveInstances = new(initialInstancePoolSize);
+            for (int i = 0; i < initialInstancePoolSize; i++)
+                AddNewInactiveInstance();
 
             // Bank Collection
             _banksPendingUnload = new();
@@ -61,7 +55,7 @@ namespace FMODHelpers
             // Event Instance Pool
             _eventInstanceDataPool = new(
                 () => new EventInstanceData(),
-                defaultCapacity: UserDataPoolSize
+                defaultCapacity: initialInstancePoolSize
             );
         }
 
@@ -284,7 +278,7 @@ namespace FMODHelpers
         {
             // Make sure we have FMODUserData
             if (_inactiveInstances.Count == 0)
-                throw new Exception($"Active sound instance count exceeded {UserDataPoolSize}");
+                AddNewInactiveInstance();
 
             // Get and/or Increment Count
             EventInstancePlayCountIncrement(eventRef);
@@ -353,6 +347,13 @@ namespace FMODHelpers
             EventInstancePlayCountDecrement(userData.EventRef);
             userData.Clear();
             _inactiveInstances.Push(userData);
+        }
+
+        void AddNewInactiveInstance()
+        {
+            _inactiveInstances.Push(
+                new FMODUserData(_releaseUserDataAction, destroyCancellationToken)
+            );
         }
         #endregion
 

@@ -20,19 +20,16 @@ namespace FMODHelpers
         #region Private State
         CancellationToken _callbackCancellationToken;
         Action<FMODUserData> _releaseUserDataAction;
-        Action<FMODCallback> _enqueueCallbackAction;
         Action<FMODCallbackData> _userDataHandler;
         #endregion
 
         #region Constructor
         public FMODUserData(
             Action<FMODUserData> releaseUserDataAction,
-            Action<FMODCallback> enqueueCallbackAction,
             CancellationToken callbackCancellationToken
         )
         {
             _releaseUserDataAction = releaseUserDataAction;
-            _enqueueCallbackAction = enqueueCallbackAction;
             _callbackCancellationToken = callbackCancellationToken;
         }
         #endregion
@@ -53,8 +50,6 @@ namespace FMODHelpers
 
         #region Public API
         public void Release() => _releaseUserDataAction(this);
-
-        public void EnqueueCallback(FMODCallback callback) => _enqueueCallbackAction(callback);
 
         public void Clear()
         {
