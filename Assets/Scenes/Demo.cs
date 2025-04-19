@@ -16,9 +16,6 @@ public class Demo : MonoBehaviour, IFMODStudioEventHandler
 
     [SerializeField]
     PiperManager piperManager;
-
-    [SerializeField]
-    AudioSource audioSource;
     #endregion
 
     #region State
