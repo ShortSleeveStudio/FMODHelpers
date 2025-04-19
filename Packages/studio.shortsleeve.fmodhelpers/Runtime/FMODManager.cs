@@ -18,10 +18,12 @@ namespace FMODHelpers
         public const string BusMaster = "bus:/";
         #endregion
 
-        #region Inspector
-        [SerializeField]
-        FMODEventRef dialogueEvent;
+        #region Static
+        static Thread MainThread;
+        public static bool IsMainThread => Thread.CurrentThread == MainThread;
+        #endregion
 
+        #region Inspector
         [SerializeField]
         int initialInstancePoolSize = 32;
         #endregion
@@ -30,7 +32,8 @@ namespace FMODHelpers
         Bus _masterBus;
         Func<bool> _haveBanksLoaded;
         List<FMODBankRef> _banksPendingUnload;
-        Stack<FMODUserData> _inactiveInstances;
+        Stack<FMODUserData> _inactiveUserData;
+        HashSet<FMODUserData> _activeUserData;
         Action<FMODUserData> _releaseUserDataAction;
         List<EventInstanceData> _activeInstances; // maybe should be something other than a list
         ObjectPool<EventInstanceData> _eventInstanceDataPool;
@@ -39,13 +42,17 @@ namespace FMODHelpers
         #region Unity Lifecycle
         void Awake()
         {
+            // Set Main Thread
+            MainThread = Thread.CurrentThread;
+
             // Cached Predicates
             _releaseUserDataAction = ReleaseUserData;
             _haveBanksLoaded = () => !IsAnyBankLoading();
 
             // Instance Collections
             _activeInstances = new(initialInstancePoolSize);
-            _inactiveInstances = new(initialInstancePoolSize);
+            _inactiveUserData = new(initialInstancePoolSize);
+            _activeUserData = new(initialInstancePoolSize);
             for (int i = 0; i < initialInstancePoolSize; i++)
                 AddNewInactiveInstance();
 
@@ -78,6 +85,19 @@ namespace FMODHelpers
                     RuntimeManager.UnloadBank(bankRef.StudioPath);
                     _banksPendingUnload.RemoveAt(i);
                 }
+            }
+        }
+
+        void OnDestroy()
+        {
+            Debug.Log($"DESTROYING {_inactiveUserData.Count + _activeInstances.Count} USER DATA");
+            foreach (FMODUserData data in _inactiveUserData)
+            {
+                data.Handle.Free();
+            }
+            foreach (FMODUserData data in _activeUserData)
+            {
+                data.Handle.Free();
             }
         }
         #endregion
@@ -156,7 +176,7 @@ namespace FMODHelpers
 
         public void PlayOneShot(FMODEventRef eventRef, Vector3 atPosition)
         {
-            EventInstance eventInstance = CreateEventInstance(eventRef);
+            EventInstance eventInstance = GetEventInstance(eventRef);
             eventInstance.set3DAttributes(RuntimeUtils.To3DAttributes(atPosition));
             eventInstance.start();
             eventInstance.release();
@@ -168,108 +188,22 @@ namespace FMODHelpers
         /// </summary>
         /// <param name="eventRef">Event to instantiate</param>
         /// <returns></returns>
-        public EventInstance GetEventInstance(FMODEventRef eventRef) =>
-            CreateEventInstance(eventRef);
-
-        /// <summary>
-        /// Create a new instance of a programmer sound.
-        /// WARNING: Be sure to release this when you're done.
-        /// </summary>
-        /// <param name="dialogueTableKey">Key to look up the programmer sound</param>
-        /// <param name="token">Cancellation token</param>
-        /// <returns></returns>
-        public async Awaitable<EventInstance> GetDialogueEventInstance(
-            string dialogueTableKey,
-            CancellationToken token
+        public EventInstance GetEventInstance(
+            FMODEventRef eventRef,
+            EVENT_CALLBACK_TYPE callbacks = EVENT_CALLBACK_TYPE.DESTROYED
         )
-        {
-            // Return Value
-            EventInstance eventInstance;
-            eventInstance.handle = IntPtr.Zero;
-
-            // Load Sound Path
-            SOUND_INFO dialogueSoundInfo;
-            FMOD.RESULT keyResult = RuntimeManager.StudioSystem.getSoundInfo(
-                dialogueTableKey,
-                out dialogueSoundInfo
-            );
-            if (keyResult != FMOD.RESULT.OK)
-            {
-                Debug.LogError($"Couldn't find dialogue with key: {dialogueTableKey}");
-                await Awaitable.NextFrameAsync(token);
-                return eventInstance;
-            }
-
-            // Load Sound
-            FMOD.Sound dialogueSound;
-            FMOD.MODE soundMode =
-                FMOD.MODE.LOOP_NORMAL | FMOD.MODE.CREATECOMPRESSEDSAMPLE | FMOD.MODE.NONBLOCKING;
-
-            FMOD.RESULT soundResult = RuntimeManager.CoreSystem.createSound(
-                dialogueSoundInfo.name_or_data,
-                soundMode | dialogueSoundInfo.mode,
-                ref dialogueSoundInfo.exinfo,
-                out dialogueSound
-            );
-            if (soundResult != FMOD.RESULT.OK)
-            {
-                Debug.LogError("Couldn't load sound: " + dialogueTableKey);
-                return eventInstance;
-            }
-
-            // Wait to Load
-            FMOD.OPENSTATE openstate;
-            uint percentbuffered;
-            bool starving;
-            bool diskbusy;
-            dialogueSound.getOpenState(
-                out openstate,
-                out percentbuffered,
-                out starving,
-                out diskbusy
-            );
-            float start = Time.unscaledTime;
-            bool warningTriggered = false;
-            while (openstate != FMOD.OPENSTATE.READY)
-            {
-                await Awaitable.NextFrameAsync(token);
-                dialogueSound.getOpenState(
-                    out openstate,
-                    out percentbuffered,
-                    out starving,
-                    out diskbusy
-                );
-                if (!warningTriggered && Time.unscaledTime - start > 2) // Warning if it takes longer than 2 seconds
-                {
-                    Debug.LogWarning($"Loading {dialogueTableKey} is taking a long time...");
-                    warningTriggered = true;
-                }
-            }
-
-            // Create Instance
-            eventInstance = CreateEventInstance(dialogueEvent);
-
-            // Store Loaded Sound Data
-            FMODUserData userData = eventInstance.GetUserData();
-            userData.FmodSound = dialogueSound;
-            userData.FmodSoundInfo = dialogueSoundInfo;
-
-            // Return the instance
-            return eventInstance;
-        }
-
-        EventInstance CreateEventInstance(FMODEventRef eventRef)
         {
             EventInstance eventInstance = RuntimeManager.CreateInstance(eventRef.Guid);
             FMODUserData userData = TryGetUserData(eventRef);
-            eventInstance.setUserData(GCHandle.ToIntPtr(GCHandle.Alloc(userData)));
+            userData.CurrentInstance = eventInstance;
+            eventInstance.setUserData(GCHandle.ToIntPtr(userData.Handle));
             eventInstance.setCallback(
-                FMODNativeCallback.Instance,
-                EVENT_CALLBACK_TYPE.STOPPED
-                    | EVENT_CALLBACK_TYPE.CREATE_PROGRAMMER_SOUND
+                FMODNativeCallbackStudioEvent.StudioEventCallbackInstance,
+                // There's cleanup we have to do for these guys so we always listen
+                EVENT_CALLBACK_TYPE.CREATE_PROGRAMMER_SOUND
                     | EVENT_CALLBACK_TYPE.DESTROY_PROGRAMMER_SOUND
                     | EVENT_CALLBACK_TYPE.DESTROYED
-                    | EVENT_CALLBACK_TYPE.TIMELINE_MARKER
+                    | callbacks
             );
             return eventInstance;
         }
@@ -277,14 +211,15 @@ namespace FMODHelpers
         FMODUserData TryGetUserData(FMODEventRef eventRef)
         {
             // Make sure we have FMODUserData
-            if (_inactiveInstances.Count == 0)
+            if (_inactiveUserData.Count == 0)
                 AddNewInactiveInstance();
 
             // Get and/or Increment Count
             EventInstancePlayCountIncrement(eventRef);
 
             // Return FMODUserData
-            FMODUserData userData = _inactiveInstances.Pop();
+            FMODUserData userData = _inactiveUserData.Pop();
+            _activeUserData.Add(userData);
             userData.EventRef = eventRef;
             return userData;
         }
@@ -346,13 +281,14 @@ namespace FMODHelpers
         {
             EventInstancePlayCountDecrement(userData.EventRef);
             userData.Clear();
-            _inactiveInstances.Push(userData);
+            _activeUserData.Remove(userData);
+            _inactiveUserData.Push(userData);
         }
 
         void AddNewInactiveInstance()
         {
-            _inactiveInstances.Push(
-                new FMODUserData(_releaseUserDataAction, destroyCancellationToken)
+            _inactiveUserData.Push(
+                FMODUserData.Create(_releaseUserDataAction, destroyCancellationToken)
             );
         }
         #endregion

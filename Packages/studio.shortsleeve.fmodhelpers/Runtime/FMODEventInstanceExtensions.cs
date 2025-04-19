@@ -40,12 +40,19 @@ namespace FMODHelpers
         {
             if (!eventInstance.isValid())
                 return;
-            FMOD.RESULT result = eventInstance.stop(immediate ? FMOD.Studio.STOP_MODE.IMMEDIATE : FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+            FMOD.RESULT result = eventInstance.stop(
+                immediate ? FMOD.Studio.STOP_MODE.IMMEDIATE : FMOD.Studio.STOP_MODE.ALLOWFADEOUT
+            );
             if (result != FMOD.RESULT.OK)
                 Debug.LogError($"Couldn't stop event: {result}");
         }
 
-        public static void SetParameter(this EventInstance eventInstance, string parameter, float value, bool skipSeek = false)
+        public static void SetParameter(
+            this EventInstance eventInstance,
+            string parameter,
+            float value,
+            bool skipSeek = false
+        )
         {
             if (!eventInstance.isValid())
             {
@@ -55,7 +62,9 @@ namespace FMODHelpers
             FMOD.RESULT result = eventInstance.setParameterByName(parameter, value, skipSeek);
             if (result != FMOD.RESULT.OK)
             {
-                Debug.LogError($"Failed to set parameter {parameter} with value {value}: {result}.");
+                Debug.LogError(
+                    $"Failed to set parameter {parameter} with value {value}: {result}."
+                );
             }
         }
 
@@ -88,26 +97,40 @@ namespace FMODHelpers
             return (FMODUserData)userDataHandle.Target;
         }
 
-        public static void OnStateChange(this EventInstance eventInstance, Action<FMODCallbackData> callback)
+        public static void RegisterCallbackHandler(
+            this EventInstance eventInstance,
+            IFMODStudioEventHandler handler
+        )
         {
-            FMODUserData userData = eventInstance.GetUserData();
-            userData.UserCallbackHandler = callback;
+            FMODUserData userData = GetUserData(eventInstance);
+            if (userData == null)
+                return;
+            userData.StudioEventCallbackHandler = handler;
         }
 
         public static FMODEventRef GetEventRef(this EventInstance eventInstance)
         {
             FMODUserData userData = eventInstance.GetUserData();
+            if (userData == null)
+                return null;
             return userData.EventRef;
         }
 
-        public static void AttachToGameObject(this EventInstance eventInstance, GameObject gameObject)
+        public static void AttachToGameObject(
+            this EventInstance eventInstance,
+            GameObject gameObject
+        )
         {
             if (!eventInstance.isValid())
             {
                 Debug.LogError("Can't attach object to a destroyed sound instance");
                 return;
             }
-            RuntimeManager.AttachInstanceToGameObject(eventInstance, gameObject.transform, gameObject.GetComponent<Rigidbody2D>());
+            RuntimeManager.AttachInstanceToGameObject(
+                eventInstance,
+                gameObject.transform,
+                gameObject.GetComponent<Rigidbody2D>()
+            );
         }
 
         public static void DetachFromGameObject(this EventInstance eventInstance)

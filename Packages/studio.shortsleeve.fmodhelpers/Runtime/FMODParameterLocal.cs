@@ -3,7 +3,9 @@ using System;
 namespace FMODHelpers
 {
     [Serializable]
-    public class FMODParameterLocal : IEquatable<FMODParameterLocal>, IComparable<FMODParameterLocal>
+    public class FMODParameterLocal
+        : IEquatable<FMODParameterLocal>,
+            IComparable<FMODParameterLocal>
     {
         [ReadOnly]
         public string name;
@@ -19,11 +21,13 @@ namespace FMODHelpers
             return parameter;
         }
 
-        public int CompareTo(FMODParameterLocal other) => GetComparerString().CompareTo(other.GetComparerString());
+        public int CompareTo(FMODParameterLocal other) =>
+            GetComparerString().CompareTo(other.GetComparerString());
 
         public override int GetHashCode() => GetComparerString().GetHashCode();
 
-        public bool Equals(FMODParameterLocal other) => GetComparerString().Equals(other.GetComparerString());
+        public bool Equals(FMODParameterLocal other) =>
+            GetComparerString().Equals(other.GetComparerString());
 
         private string GetComparerString()
         {

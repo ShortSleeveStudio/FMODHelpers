@@ -12,7 +12,9 @@ namespace FMODHelpers.Editor
         #region Constants
         const string EditorBankPrefix = "bank:/";
         const string EditorEventPrefix = "event:/";
-        const string EditorFMODPath = "Assets/FMOD";
+        const string EditorFMOD = "FMOD";
+        const string EditorFMODAssets = "Assets";
+        const string EditorFMODPath = EditorFMODAssets + "/" + EditorFMOD;
         const string EditorFMODBanksName = "Banks";
         const string EditorFMODBanksPath = EditorFMODPath + "/" + EditorFMODBanksName;
         const string EditorFMODBanksTempPath = EditorFMODTempPath + "/" + EditorFMODBanksName;
@@ -75,11 +77,15 @@ namespace FMODHelpers.Editor
 
                 // Ensure directories don't already exist
                 if (!AssetDatabase.AssetPathExists(EditorFMODPath))
-                    throw new Exception("FMOD folder doesn't exist");
+                    AssetDatabase.CreateFolder(EditorFMODAssets, EditorFMOD);
                 if (AssetDatabase.AssetPathExists(EditorFMODTempPath))
-                    throw new Exception($"Temporary folder from a previous import still exists: {EditorFMODTempPath}");
+                    throw new Exception(
+                        $"Temporary folder from a previous import still exists: {EditorFMODTempPath}"
+                    );
                 if (AssetDatabase.AssetPathExists(EditorFMODBrokenPath))
-                    throw new Exception($"Broken references folder from a previous import still exists: {EditorFMODBrokenPath}");
+                    throw new Exception(
+                        $"Broken references folder from a previous import still exists: {EditorFMODBrokenPath}"
+                    );
 
                 // Create temporary directory
                 AssetDatabase.CreateFolder(EditorFMODPath, EditorFMODTempName);
@@ -150,12 +156,19 @@ namespace FMODHelpers.Editor
             }
         }
 
-        static ReferenceGenerateResult GenerateBankReferences(int progressId, string tempDir, string bankFolderName, string bankTempDir)
+        static ReferenceGenerateResult GenerateBankReferences(
+            int progressId,
+            string tempDir,
+            string bankFolderName,
+            string bankTempDir
+        )
         {
             Progress.Report(progressId, 0.25f, "Generating bank references");
 
             // Create temporary lookup table
-            Dictionary<object, AssetInfo<FMODBankRef>> bankIdToBank = LoadReferenceMap<FMODBankRef>(typeof(FMODBankRef));
+            Dictionary<object, AssetInfo<FMODBankRef>> bankIdToBank = LoadReferenceMap<FMODBankRef>(
+                typeof(FMODBankRef)
+            );
 
             // Create temporary directory
             AssetDatabase.CreateFolder(tempDir, bankFolderName);
@@ -184,13 +197,21 @@ namespace FMODHelpers.Editor
             return new() { BrokenReferences = bankIdToBank.Count > 0 };
         }
 
-        static ReferenceGenerateResult GenerateEventReferences(int progressId, string tempDir, string eventDirName, string eventTempDir)
+        static ReferenceGenerateResult GenerateEventReferences(
+            int progressId,
+            string tempDir,
+            string eventDirName,
+            string eventTempDir
+        )
         {
             Progress.Report(progressId, 0.50f, "Generating event references");
 
             // Create temporary lookup tables
-            Dictionary<object, AssetInfo<FMODBankRef>> bankIdToBank = LoadReferenceMap<FMODBankRef>(typeof(FMODBankRef));
-            Dictionary<object, AssetInfo<FMODEventRef>> eventIdToEvent = LoadReferenceMap<FMODEventRef>(typeof(FMODEventRef));
+            Dictionary<object, AssetInfo<FMODBankRef>> bankIdToBank = LoadReferenceMap<FMODBankRef>(
+                typeof(FMODBankRef)
+            );
+            Dictionary<object, AssetInfo<FMODEventRef>> eventIdToEvent =
+                LoadReferenceMap<FMODEventRef>(typeof(FMODEventRef));
 
             // Create temporary directory
             AssetDatabase.CreateFolder(tempDir, eventDirName);
@@ -261,7 +282,12 @@ namespace FMODHelpers.Editor
             return map;
         }
 
-        static void MoveOrCreateAsset<T>(Dictionary<object, AssetInfo<T>> map, object assetId, string outputPath, Action<T> initializer)
+        static void MoveOrCreateAsset<T>(
+            Dictionary<object, AssetInfo<T>> map,
+            object assetId,
+            string outputPath,
+            Action<T> initializer
+        )
             where T : FMODRef
         {
             AssetInfo<T> refInfo;
@@ -286,7 +312,8 @@ namespace FMODHelpers.Editor
         static string SanitizeFileName(string name)
         {
             char[] invalids = Path.GetInvalidFileNameChars();
-            return string.Join("_", name.Split(invalids, StringSplitOptions.RemoveEmptyEntries)).TrimEnd('.');
+            return string.Join("_", name.Split(invalids, StringSplitOptions.RemoveEmptyEntries))
+                .TrimEnd('.');
         }
 
         #endregion

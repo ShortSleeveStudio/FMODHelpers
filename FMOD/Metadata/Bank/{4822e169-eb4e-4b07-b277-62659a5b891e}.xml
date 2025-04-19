@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="Bank" id="{4822e169-eb4e-4b07-b277-62659a5b891e}">
+		<property name="name">
+			<value>Master</value>
+		</property>
+		<property name="isMasterBank">
+			<value>true</value>
+		</property>
+		<relationship name="folder">
+			<destination>{d8d610b8-16a5-4bd8-aa73-4e8b6e66ed23}</destination>
+		</relationship>
+		<relationship name="audioTable">
+			<destination>{c5a33ef2-1dd0-4f61-943e-24e8f3c15d34}</destination>
+		</relationship>
+	</object>
+	<object class="AudioTable" id="{c5a33ef2-1dd0-4f61-943e-24e8f3c15d34}">
+		<property name="name">
+			<value>Audio Table</value>
+		</property>
+		<property name="sourceDirectory">
+			<value>Sound</value>
+		</property>
+	</object>
+</objects>
