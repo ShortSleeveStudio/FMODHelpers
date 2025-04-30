@@ -5,6 +5,54 @@ using FMODHelpers;
 using Piper;
 using UnityEngine;
 
+// public class AudioTableNoLoadTester : IFMODStudioEventHandler
+// {
+//     int _subSoundIndex;
+//     IntPtr _soundHandle;
+
+//     public AudioTableNoLoadTester(string tableKey)
+//     {
+//         // Load Sound Info
+//         SOUND_INFO soundInfo;
+//         FMOD.RESULT keyResult = FMODUnity.RuntimeManager.StudioSystem.getSoundInfo(tableKey, out soundInfo);
+//         if (keyResult != FMOD.RESULT.OK)
+//         {
+//             Debug.LogError($"Couldn't find audio in table with key: {tableKey}");
+//             return;
+//         }
+
+//         // Load Sound
+//         FMOD.Sound sound;
+//         FMOD.MODE soundMode =
+//             FMOD.MODE.LOOP_NORMAL | FMOD.MODE.CREATECOMPRESSEDSAMPLE | FMOD.MODE.NONBLOCKING;
+//         FMOD.RESULT soundResult = RuntimeManager.CoreSystem.createSound(
+//             soundInfo.name_or_data,
+//             soundMode | soundInfo.mode,
+//             ref soundInfo.exinfo,
+//             out sound
+//         );
+//         if (soundResult != FMOD.RESULT.OK)
+//         {
+//             Debug.LogError($"Couldn't load audio in table with key: {tableKey}");
+//             return;
+//         }
+//         _soundHandle = sound.handle;
+//         _subSoundIndex = soundInfo.subsoundindex;
+//     }
+
+//     #region Programmer Instrument
+//     void IFMODStudioEventHandler.OnCreateProgrammerSound(
+//         bool isMainThread,
+//         FMODUserData userData,
+//         ref PROGRAMMER_SOUND_PROPERTIES programmerSoundProperties
+//     )
+//     {
+//         programmerSoundProperties.sound = _soundHandle;
+//         programmerSoundProperties.subsoundIndex = _subSoundIndex;
+//     }
+//     #endregion
+// }
+
 public class Demo : MonoBehaviour, IFMODStudioEventHandler
 {
     #region Inspector
@@ -41,7 +89,7 @@ public class Demo : MonoBehaviour, IFMODStudioEventHandler
     }
     #endregion
 
-    #region Byte Array
+    #region Play Byte Array
     public async Awaitable PlayFromByteArray()
     {
         string path = $"{Application.streamingAssetsPath}/TestAudio.wav";
@@ -54,7 +102,7 @@ public class Demo : MonoBehaviour, IFMODStudioEventHandler
     }
     #endregion
 
-    #region Audio Table
+    #region Play Audio Table
     public async Awaitable PlayFromAudioTable()
     {
         string key = $"TestAudio";
@@ -65,6 +113,21 @@ public class Demo : MonoBehaviour, IFMODStudioEventHandler
         PlaySound(result);
     }
     #endregion
+
+    // #region Play Audio Table - No Preload
+    // public void PlayFromAudioTableNoPreload()
+    // {
+    //     string key = $"TestAudio";
+    //     AudioTableNoLoadTester test = new(key);
+    //     EventInstance instance = fmod.GetEventInstance(
+    //         programmerSound,
+    //         EVENT_CALLBACK_TYPE.CREATE_PROGRAMMER_SOUND
+    //     );
+    //     instance.RegisterCallbackHandler(test);
+    //     instance.Start();
+    //     instance.Release();
+    // }
+    // #endregion
 
     #region TTS
     public async Awaitable PlayTTS(string output)
@@ -138,6 +201,10 @@ public class DemoEditor : UnityEditor.Editor
         {
             _ = ((Demo)target).PlayFromAudioTable();
         }
+        // if (GUILayout.Button("Play from Audio Table - No Preload"))
+        // {
+        //     ((Demo)target).PlayFromAudioTableNoPreload();
+        // }
         UnityEditor.EditorGUILayout.LabelField("Text to Speech");
         _textArea = UnityEditor.EditorGUILayout.TextArea(_textArea);
         if (GUILayout.Button("Play TTS"))

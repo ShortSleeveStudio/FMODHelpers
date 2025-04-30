@@ -358,6 +358,7 @@ GameObject:
   - component: {fileID: 1741350897}
   - component: {fileID: 1741350895}
   - component: {fileID: 1741350894}
+  - component: {fileID: 1741350898}
   m_Layer: 0
   m_Name: Tester
   m_TagString: Untagged
@@ -424,6 +425,19 @@ MonoBehaviour:
   model: {fileID: 5022602860645237092, guid: c1b73ee2509058346839b4da7adbda2d, type: 3}
   voice: en-us
   sampleRate: 22050
+--- !u!114 &1741350898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1741350893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d66f5d3f05cbd9f43ac9f4557e2cbfbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  programmerSound: {fileID: 11400000, guid: f917d544d553a0e49957c80b506d7e51, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
