@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using FMOD.Studio;
 using FMODHelpers;
+using FMODUnity;
 using Piper;
 using UnityEngine;
 
@@ -12,21 +13,13 @@ public class Demo : MonoBehaviour, IFMODStudioEventHandler
     FMODManager fmod;
 
     [SerializeField]
-    FMODEventRef programmerSound;
+    EventReference programmerSound;
+
+    [SerializeField]
+    EventReference test;
 
     [SerializeField]
     PiperManager piperManager;
-    #endregion
-
-    #region State
-    SoundCreateResult[] soundTable;
-    #endregion
-
-    #region Unity Lifecycle
-    void Awake()
-    {
-        soundTable = new SoundCreateResult[128];
-    }
     #endregion
 
     #region Play File
@@ -94,7 +87,7 @@ public class Demo : MonoBehaviour, IFMODStudioEventHandler
             programmerSound,
             EVENT_CALLBACK_TYPE.CREATE_PROGRAMMER_SOUND
         );
-        soundTable[instance.GetUserData().ID] = result;
+        instance.SetProgrammerSound(result);
         instance.RegisterCallbackHandler(this);
         instance.Start();
         instance.Release();
@@ -108,9 +101,12 @@ public class Demo : MonoBehaviour, IFMODStudioEventHandler
         ref PROGRAMMER_SOUND_PROPERTIES programmerSoundProperties
     )
     {
-        SoundCreateResult result = soundTable[userData.ID];
-        programmerSoundProperties.sound = result.Sound.handle;
-        programmerSoundProperties.subsoundIndex = result.SubsoundIndex;
+        SoundCreateResult? result = userData.ProgrammerSoundResult;
+        if (result.HasValue)
+        {
+            programmerSoundProperties.sound = result.Value.Sound.handle;
+            programmerSoundProperties.subsoundIndex = result.Value.SubsoundIndex;
+        }
     }
     #endregion
 }

@@ -23,12 +23,12 @@ namespace FMODHelpers.Editor
             SerializedProperty eventReferenceProperty = property.FindPropertyRelative(nameof(FMODParameterizedEvent.EventRef));
             SerializedProperty defaultLocalParametersProperty = property.FindPropertyRelative(nameof(FMODParameterizedEvent.DefaultLocalParameters));
 
-            // Grab Event Reference Object
-            FMODEventRef eventReference = eventReferenceProperty.boxedValue as FMODEventRef;
-            if (eventReference != null && EventManager.IsInitialized)
+            // Extract GUID from EventReference struct
+            FMOD.GUID guid = FMODEditorUtilities.ExtractGuidFromEventReference(eventReferenceProperty);
+            if (!FMODEditorUtilities.IsGuidNull(guid) && EventManager.IsInitialized)
             {
                 // Check if Event Exists
-                EditorEventRef eventRef = EventManager.EventFromGUID(eventReference.Guid);
+                EditorEventRef eventRef = EventManager.EventFromGUID(guid);
                 if (eventRef != null)
                 {
                     // Ensure Correct List Size
@@ -72,5 +72,6 @@ namespace FMODHelpers.Editor
             EditorGUI.EndProperty();
         }
         #endregion
+
     }
 }

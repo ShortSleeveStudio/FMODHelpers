@@ -47,7 +47,12 @@ namespace FMODHelpers
                             userData
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.DESTROYED:
                     try
@@ -57,7 +62,12 @@ namespace FMODHelpers
                             userData
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     ReleaseUserData(userData);
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.STARTING:
@@ -68,7 +78,12 @@ namespace FMODHelpers
                             userData
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.STARTED:
                     try
@@ -78,7 +93,12 @@ namespace FMODHelpers
                             userData
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.RESTARTED:
                     try
@@ -88,7 +108,12 @@ namespace FMODHelpers
                             userData
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.STOPPED:
                     try
@@ -98,7 +123,12 @@ namespace FMODHelpers
                             userData
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.START_FAILED:
                     try
@@ -108,7 +138,12 @@ namespace FMODHelpers
                             userData
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.CREATE_PROGRAMMER_SOUND:
                     FMOD.Studio.PROGRAMMER_SOUND_PROPERTIES createProperties =
@@ -125,7 +160,12 @@ namespace FMODHelpers
                             ref createProperties
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     Marshal.StructureToPtr(createProperties, parameterPtr, false);
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.DESTROY_PROGRAMMER_SOUND:
@@ -143,7 +183,12 @@ namespace FMODHelpers
                             ref destroyProperties
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     new FMOD.Sound(destroyProperties.sound).release();
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.PLUGIN_CREATED:
@@ -161,7 +206,12 @@ namespace FMODHelpers
                             ref pluginCreateProperties
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.PLUGIN_DESTROYED:
                     FMOD.Studio.PLUGIN_INSTANCE_PROPERTIES pluginDestroyedProperties =
@@ -178,7 +228,12 @@ namespace FMODHelpers
                             ref pluginDestroyedProperties
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.TIMELINE_MARKER:
                     FMOD.Studio.TIMELINE_MARKER_PROPERTIES markerParameter =
@@ -195,7 +250,12 @@ namespace FMODHelpers
                             ref markerParameter
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.TIMELINE_BEAT:
                     FMOD.Studio.TIMELINE_BEAT_PROPERTIES beatProperties =
@@ -212,7 +272,12 @@ namespace FMODHelpers
                             ref beatProperties
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.SOUND_PLAYED:
                     FMOD.Sound soundPlayed = (FMOD.Sound)
@@ -225,20 +290,30 @@ namespace FMODHelpers
                             ref soundPlayed
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.SOUND_STOPPED:
                     FMOD.Sound soundStopped = (FMOD.Sound)
                         Marshal.PtrToStructure(parameterPtr, typeof(FMOD.Sound));
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnSoundPlayed(
+                        userData?.StudioEventCallbackHandler.OnSoundStopped(
                             FMODManager.IsMainThread,
                             userData,
                             ref soundStopped
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.REAL_TO_VIRTUAL:
                     try
@@ -248,7 +323,12 @@ namespace FMODHelpers
                             userData
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.VIRTUAL_TO_REAL:
                     try
@@ -258,7 +338,12 @@ namespace FMODHelpers
                             userData
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.START_EVENT_COMMAND:
                     FMOD.Studio.EventInstance startEvent = (FMOD.Studio.EventInstance)
@@ -271,7 +356,12 @@ namespace FMODHelpers
                             ref startEvent
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.NESTED_TIMELINE_BEAT:
                     FMOD.Studio.TIMELINE_NESTED_BEAT_PROPERTIES nestedProperties =
@@ -288,7 +378,12 @@ namespace FMODHelpers
                             ref nestedProperties
                         );
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+                        Debug.LogError($"Exception in FMOD callback: {ex}");
+                        #endif
+                    }
                     break;
             }
             return FMOD.RESULT.OK;

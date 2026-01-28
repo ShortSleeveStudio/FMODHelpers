@@ -1,4 +1,5 @@
 using System;
+using FMODUnity;
 
 namespace FMODHelpers
 {
@@ -6,6 +7,6 @@ namespace FMODHelpers
     public class FMODParameter
     {
         public string ParameterName;
-        public FMODEventRef EventRef;
+        public EventReference EventRef;
     }
 }

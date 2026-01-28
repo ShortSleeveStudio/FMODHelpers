@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using FMOD.Studio;
+using FMODUnity;
 
 namespace FMODHelpers
 {
@@ -8,18 +9,18 @@ namespace FMODHelpers
     public class FMODParameterizedEvent
     {
         #region Public Fields
-        public FMODEventRef EventRef;
+        public EventReference EventRef;
         public List<FMODParameterLocal> DefaultLocalParameters;
         #endregion
 
         #region Public API
         public void Reset()
         {
-            EventRef = null;
+            EventRef = new();
             DefaultLocalParameters = new();
         }
 
-        public bool IsValid() => EventRef != null;
+        public bool IsValid() => !EventRef.IsNull;
 
         public void ApplyParameters(EventInstance instance)
         {

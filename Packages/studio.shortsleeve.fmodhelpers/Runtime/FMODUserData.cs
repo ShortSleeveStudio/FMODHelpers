@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using FMOD.Studio;
+using FMODUnity;
 
 namespace FMODHelpers
 {
@@ -19,7 +20,7 @@ namespace FMODHelpers
         #endregion
 
         #region Internal State
-        internal FMODEventRef EventRef;
+        internal EventReference EventRef;
         internal EventInstance CurrentInstance;
         internal IFMODStudioEventHandler StudioEventCallbackHandler;
         #endregion
@@ -37,6 +38,9 @@ namespace FMODHelpers
 
         // Use this for whatever you like
         public IntPtr CustomStatePointer { get; set; }
+
+        // Stores the SoundCreateResult for programmer sounds
+        public SoundCreateResult? ProgrammerSoundResult { get; set; }
         #endregion
 
         #region Constructor / Factory
@@ -66,10 +70,11 @@ namespace FMODHelpers
             // own anymore.
             CurrentInstance.setUserData(IntPtr.Zero);
             CurrentInstance.clearHandle();
-            EventRef = null;
+            EventRef = new();
             StudioEventCallbackHandler = null;
             CustomStateObject = null;
             CustomStatePointer = IntPtr.Zero;
+            ProgrammerSoundResult = null;
         }
         #endregion
     }

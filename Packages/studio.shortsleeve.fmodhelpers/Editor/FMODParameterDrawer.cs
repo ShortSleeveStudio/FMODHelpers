@@ -49,11 +49,11 @@ namespace FMODHelpers.Editor
                 SerializedProperty parameterProperty = property.FindPropertyRelative(nameof(FMODParameter.ParameterName));
 
                 // Draw Dropdown
-                FMODEventRef eventReference = eventRefProperty.boxedValue as FMODEventRef;
-                if (eventReference != null && EventManager.IsInitialized)
+                FMOD.GUID guid = FMODEditorUtilities.ExtractGuidFromEventReference(eventRefProperty);
+                if (!FMODEditorUtilities.IsGuidNull(guid) && EventManager.IsInitialized)
                 {
                     // Check if Event Exists
-                    EditorEventRef eventRef = EventManager.EventFromGUID(eventReference.Guid);
+                    EditorEventRef eventRef = EventManager.EventFromGUID(guid);
                     if (eventRef != null && eventRef.LocalParameters.Count > 0)
                     {
                         // Load Current Value
