@@ -26,7 +26,9 @@ namespace FMODHelpers
             if (result != FMOD.RESULT.OK)
             {
                 Debug.LogError("Failed to fetch user data for audio callback: " + result);
-                instance.Destroy(immediate: true);
+                // Clean up the instance if we can't get user data
+                instance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                instance.release();
                 return FMOD.RESULT.OK;
             }
             if (userDataPtr == IntPtr.Zero)
