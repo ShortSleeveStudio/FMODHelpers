@@ -96,10 +96,13 @@ namespace FMODHelpers
 
         void OnDestroy()
         {
-            // Phase 1: Signal shutdown - callbacks will short-circuit
+            // Phase 1: Signal shutdown FIRST - callbacks check this before accessing GCHandles
             IsShuttingDown = true;
 
-            // Phase 2: Stop all active instances and unregister callbacks
+            // Phase 2: Clear any pending callbacks (prevents processing during shutdown)
+            FMODNativeCallbackStudioEvent.ClearQueue();
+
+            // Phase 3: Stop all active instances and unregister callbacks
             foreach (FMODUserData data in _activeUserData)
             {
                 if (data.CurrentInstance.isValid())
@@ -110,20 +113,11 @@ namespace FMODHelpers
                 }
             }
 
-            // Phase 3: Flush FMOD's command buffer - safe because callbacks just enqueue and return
-            RuntimeManager.StudioSystem.flushCommands();
-
-            // Phase 4: Clear any remaining queued callbacks and free handles
-            FMODNativeCallbackStudioEvent.ClearQueue();
-
-            foreach (FMODUserData data in _activeUserData)
-            {
-                data.Handle.Free();
-            }
-            foreach (FMODUserData data in _inactiveUserData)
-            {
-                data.Handle.Free();
-            }
+            // NOTE: We intentionally DO NOT free GCHandles here.
+            // FMOD's audio thread may still have callbacks in-flight that passed the
+            // IsShuttingDown check before we set it. Freeing handles while those callbacks
+            // are executing causes crashes/hangs. The handles will be cleaned up when
+            // the AppDomain unloads (Editor play mode exit or application quit).
         }
         #endregion
 
@@ -282,8 +276,10 @@ namespace FMODHelpers
             EventInstance eventInstance = RuntimeManager.CreateInstance(eventRef.Guid);
             if (!eventInstance.isValid())
             {
-                Debug.LogError($"Failed to create EventInstance for GUID {eventRef.Guid}. " +
-                              "Event may not exist or bank may not be loaded.");
+                Debug.LogError(
+                    $"Failed to create EventInstance for GUID {eventRef.Guid}. "
+                        + "Event may not exist or bank may not be loaded."
+                );
                 return eventInstance;
             }
 
@@ -320,7 +316,9 @@ namespace FMODHelpers
         void EventInstancePlayCountIncrement(EventReference eventRef)
         {
             // Try to increment existing
-            if (_activeInstances.TryGetValue(eventRef.Guid, out EventInstanceData eventInstanceData))
+            if (
+                _activeInstances.TryGetValue(eventRef.Guid, out EventInstanceData eventInstanceData)
+            )
             {
                 eventInstanceData.PlayCount += 1;
                 return;
@@ -336,7 +334,9 @@ namespace FMODHelpers
         void EventInstancePlayCountDecrement(EventReference eventRef)
         {
             // Try to decrement
-            if (_activeInstances.TryGetValue(eventRef.Guid, out EventInstanceData eventInstanceData))
+            if (
+                _activeInstances.TryGetValue(eventRef.Guid, out EventInstanceData eventInstanceData)
+            )
             {
                 eventInstanceData.PlayCount -= 1;
                 if (eventInstanceData.PlayCount == 0)
@@ -348,11 +348,15 @@ namespace FMODHelpers
             }
 
             // Error: tried to decrement non-existent instance
-            #if UNITY_EDITOR
-            throw new Exception($"Tried to decrement play count on event not playing: {eventRef.Path}");
-            #else
-            throw new Exception($"Tried to decrement play count on event not playing: {eventRef.Guid}");
-            #endif
+#if UNITY_EDITOR
+            throw new Exception(
+                $"Tried to decrement play count on event not playing: {eventRef.Path}"
+            );
+#else
+            throw new Exception(
+                $"Tried to decrement play count on event not playing: {eventRef.Guid}"
+            );
+#endif
         }
         #endregion
 

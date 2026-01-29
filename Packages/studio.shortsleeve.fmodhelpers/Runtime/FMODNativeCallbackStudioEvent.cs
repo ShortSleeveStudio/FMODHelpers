@@ -26,8 +26,9 @@ namespace FMODHelpers
 
     public static class FMODNativeCallbackStudioEvent
     {
-        public static readonly EVENT_CALLBACK StudioEventCallbackInstance =
-            new EVENT_CALLBACK(StudioEventCallback);
+        public static readonly EVENT_CALLBACK StudioEventCallbackInstance = new EVENT_CALLBACK(
+            StudioEventCallback
+        );
 
         static readonly ConcurrentQueue<PendingCallback> _callbackQueue = new();
 
@@ -39,37 +40,54 @@ namespace FMODHelpers
             IntPtr parameterPtr
         )
         {
+            // CRITICAL: Check shutdown BEFORE accessing GCHandle to avoid accessing freed handles
+            if (FMODManager.IsShuttingDown)
+                return FMOD.RESULT.OK;
+
             // Resolve UserData
             EventInstance instance = new EventInstance(instancePtr);
             IntPtr userDataPtr;
-            if (instance.getUserData(out userDataPtr) != FMOD.RESULT.OK || userDataPtr == IntPtr.Zero)
+            if (
+                instance.getUserData(out userDataPtr) != FMOD.RESULT.OK
+                || userDataPtr == IntPtr.Zero
+            )
                 return FMOD.RESULT.OK;
 
             GCHandle userDataHandle = GCHandle.FromIntPtr(userDataPtr);
             FMODUserData userData = (FMODUserData)userDataHandle.Target;
 
-            // Short-circuit if shutting down
-            if (userData == null || FMODManager.IsShuttingDown || userData.Cancellation.IsCancellationRequested)
+            // Short-circuit if invalid or cancelled
+            if (userData == null || userData.Cancellation.IsCancellationRequested)
                 return FMOD.RESULT.OK;
 
             // Handle synchronous callbacks that must interact with FMOD immediately
             switch (type)
             {
                 case EVENT_CALLBACK_TYPE.CREATE_PROGRAMMER_SOUND:
-                    var createProps = Marshal.PtrToStructure<PROGRAMMER_SOUND_PROPERTIES>(parameterPtr);
+                    var createProps = Marshal.PtrToStructure<PROGRAMMER_SOUND_PROPERTIES>(
+                        parameterPtr
+                    );
                     try
                     {
-                        userData.StudioEventCallbackHandler?.OnCreateProgrammerSound(userData, ref createProps);
+                        userData.StudioEventCallbackHandler?.OnCreateProgrammerSound(
+                            userData,
+                            ref createProps
+                        );
                     }
                     catch { }
                     Marshal.StructureToPtr(createProps, parameterPtr, false);
                     return FMOD.RESULT.OK;
 
                 case EVENT_CALLBACK_TYPE.DESTROY_PROGRAMMER_SOUND:
-                    var destroyProps = Marshal.PtrToStructure<PROGRAMMER_SOUND_PROPERTIES>(parameterPtr);
+                    var destroyProps = Marshal.PtrToStructure<PROGRAMMER_SOUND_PROPERTIES>(
+                        parameterPtr
+                    );
                     try
                     {
-                        userData.StudioEventCallbackHandler?.OnDestroyProgrammerSound(userData, ref destroyProps);
+                        userData.StudioEventCallbackHandler?.OnDestroyProgrammerSound(
+                            userData,
+                            ref destroyProps
+                        );
                     }
                     catch { }
                     new FMOD.Sound(destroyProps.sound).release();
@@ -82,11 +100,13 @@ namespace FMODHelpers
             switch (type)
             {
                 case EVENT_CALLBACK_TYPE.TIMELINE_MARKER:
-                    var markerProps = Marshal.PtrToStructure<TIMELINE_MARKER_PROPERTIES>(parameterPtr);
+                    var markerProps = Marshal.PtrToStructure<TIMELINE_MARKER_PROPERTIES>(
+                        parameterPtr
+                    );
                     pending.MarkerData = new TimelineMarkerData
                     {
                         Name = markerProps.name,
-                        Position = markerProps.position
+                        Position = markerProps.position,
                     };
                     break;
 
@@ -99,12 +119,14 @@ namespace FMODHelpers
                         Position = beatProps.position,
                         Tempo = beatProps.tempo,
                         TimeSignatureUpper = beatProps.timesignatureupper,
-                        TimeSignatureLower = beatProps.timesignaturelower
+                        TimeSignatureLower = beatProps.timesignaturelower,
                     };
                     break;
 
                 case EVENT_CALLBACK_TYPE.NESTED_TIMELINE_BEAT:
-                    var nestedProps = Marshal.PtrToStructure<TIMELINE_NESTED_BEAT_PROPERTIES>(parameterPtr);
+                    var nestedProps = Marshal.PtrToStructure<TIMELINE_NESTED_BEAT_PROPERTIES>(
+                        parameterPtr
+                    );
                     pending.NestedBeatData = new NestedTimelineBeatData
                     {
                         Bar = nestedProps.properties.bar,
@@ -113,7 +135,7 @@ namespace FMODHelpers
                         Tempo = nestedProps.properties.tempo,
                         TimeSignatureUpper = nestedProps.properties.timesignatureupper,
                         TimeSignatureLower = nestedProps.properties.timesignaturelower,
-                        EventGuid = nestedProps.eventid
+                        EventGuid = nestedProps.eventid,
                     };
                     break;
 
@@ -140,8 +162,12 @@ namespace FMODHelpers
         {
             while (_callbackQueue.TryDequeue(out var callback))
             {
-                // Skip if userData is invalid or shutting down
-                if (callback.UserData == null || callback.UserData.Cancellation.IsCancellationRequested)
+                // Skip if shutting down or userData is invalid
+                if (
+                    FMODManager.IsShuttingDown
+                    || callback.UserData == null
+                    || callback.UserData.Cancellation.IsCancellationRequested
+                )
                     continue;
 
                 var handler = callback.UserData.StudioEventCallbackHandler;
@@ -179,7 +205,10 @@ namespace FMODHelpers
                             handler?.OnTimelineBeat(callback.UserData, callback.BeatData);
                             break;
                         case EVENT_CALLBACK_TYPE.NESTED_TIMELINE_BEAT:
-                            handler?.OnNestedTimelineBeat(callback.UserData, callback.NestedBeatData);
+                            handler?.OnNestedTimelineBeat(
+                                callback.UserData,
+                                callback.NestedBeatData
+                            );
                             break;
                         case EVENT_CALLBACK_TYPE.SOUND_PLAYED:
                             handler?.OnSoundPlayed(callback.UserData, callback.Sound);
