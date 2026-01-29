@@ -14,7 +14,7 @@ namespace FMODHelpers
 
         #region Private State
         int _ID;
-        GCHandle _handle; // this is expected to exist until the program closes so we never free them
+        GCHandle _handle;
         Action<FMODUserData> _releaseUserDataAction;
         internal CancellationToken _callbackCancellationToken;
         #endregion
@@ -65,7 +65,7 @@ namespace FMODHelpers
 
         public void Clear()
         {
-            // This insures repeated calls from FMOD to the callback
+            // This ensures repeated calls from FMOD to the callback
             // handler don't mess with this user data which it doesn't
             // own anymore.
             CurrentInstance.setUserData(IntPtr.Zero);

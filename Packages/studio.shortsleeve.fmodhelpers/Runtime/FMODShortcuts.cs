@@ -56,7 +56,7 @@ namespace FMODHelpers
                 return default;
             }
 
-            // Wait to until loaded
+            // Wait until loaded
             await WaitUntilLoaded(sound, token);
 
             // Return sound
@@ -139,7 +139,7 @@ namespace FMODHelpers
                 return default;
             }
 
-            // Wait to until loaded
+            // Wait until loaded
             await WaitUntilLoaded(sound, token);
 
             // Return sound
@@ -186,7 +186,7 @@ namespace FMODHelpers
                 return default;
             }
 
-            // Wait to until loaded
+            // Wait until loaded
             await WaitUntilLoaded(sound, token);
 
             // Return sound

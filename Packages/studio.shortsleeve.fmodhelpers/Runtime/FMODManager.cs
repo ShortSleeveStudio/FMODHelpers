@@ -72,9 +72,6 @@ namespace FMODHelpers
 
         void Update()
         {
-            // Process pending releases from FMOD callbacks
-            FMODNativeCallbackStudioEvent.ProcessPendingReleases();
-
             // Unload any banks that need unloading
             if (_banksPendingUnload.Count > 0)
             {
@@ -97,11 +94,19 @@ namespace FMODHelpers
 
         void OnDestroy()
         {
-            foreach (FMODUserData data in _inactiveUserData)
+            // Stop and release all active event instances to prevent FMOD
+            // from waiting on managed callbacks during shutdown.
+            foreach (FMODUserData data in _activeUserData)
             {
+                if (data.CurrentInstance.isValid())
+                {
+                    data.CurrentInstance.setCallback(null, 0);
+                    data.CurrentInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                    data.CurrentInstance.release();
+                }
                 data.Handle.Free();
             }
-            foreach (FMODUserData data in _activeUserData)
+            foreach (FMODUserData data in _inactiveUserData)
             {
                 data.Handle.Free();
             }

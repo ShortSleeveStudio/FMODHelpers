@@ -1,5 +1,3 @@
-using System;
-using System.Reflection;
 using FMODUnity;
 using UnityEditor;
 using UnityEngine;
@@ -9,10 +7,6 @@ namespace FMODHelpers.Editor
     [CustomPropertyDrawer(typeof(FMODParameter))]
     public class FMODParameterDrawer : PropertyDrawer
     {
-        #region State
-        private FieldInfo _eventRefField;
-        #endregion
-
         #region Unity Lifecycle
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -21,9 +15,6 @@ namespace FMODHelpers.Editor
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            // Cache Reflection Data
-            CacheReflectionData();
-
             // Using BeginProperty / EndProperty on the parent property means that
             // prefab override logic works on the entire property.
             EditorGUI.BeginProperty(position, label, property);
@@ -34,7 +25,6 @@ namespace FMODHelpers.Editor
             float currentPosition = position.min.y;
             Rect rectFoldout = GetRect(position, EditorGUIUtility.singleLineHeight, ref currentPosition, ref currentHeight);
             property.isExpanded = EditorGUI.Foldout(rectFoldout, property.isExpanded, label);
-            int lines = 1;
             if (property.isExpanded)
             {
                 // Indent
@@ -80,7 +70,6 @@ namespace FMODHelpers.Editor
                 }
                 else
                 {
-                    lines += 1;
                     parameterProperty.stringValue = string.Empty;
                 }
                 EditorGUI.indentLevel--;
@@ -90,29 +79,12 @@ namespace FMODHelpers.Editor
         #endregion
 
         #region Private API
-        void CacheReflectionData()
-        {
-            _eventRefField ??= GetField(typeof(FMODParameter), nameof(FMODParameter.EventRef), BindingFlags.Instance | BindingFlags.NonPublic);
-        }
-
         Rect GetRect(Rect position, float height, ref float currentPosition, ref float currentHeight)
         {
             currentHeight = height;
             Rect rect = EditorGUI.IndentedRect(new Rect(position.min.x, currentPosition, position.size.x, currentHeight));
             currentPosition += currentHeight;
             return rect;
-        }
-
-        static FieldInfo GetField(Type @type, string name, BindingFlags flags)
-        {
-            if (@type == null)
-                return null;
-
-            FieldInfo fieldInfo = @type.GetField(name, flags);
-            if (fieldInfo != null)
-                return fieldInfo;
-
-            return GetField(@type.BaseType, name, flags);
         }
         #endregion
     }
