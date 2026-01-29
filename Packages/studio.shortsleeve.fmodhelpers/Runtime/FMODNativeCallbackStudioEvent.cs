@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -8,6 +9,8 @@ namespace FMODHelpers
     {
         public static readonly FMOD.Studio.EVENT_CALLBACK StudioEventCallbackInstance =
             new FMOD.Studio.EVENT_CALLBACK(StudioEventCallback);
+
+        static readonly ConcurrentQueue<FMODUserData> _pendingRelease = new();
 
         #region Unmanaged Callbacks
         [AOT.MonoPInvokeCallback(typeof(FMOD.Studio.EVENT_CALLBACK))]
@@ -298,18 +301,25 @@ namespace FMODHelpers
         #endregion
 
         #region Callbacks
-        static async void ReleaseUserData(FMODUserData data)
+        static void ReleaseUserData(FMODUserData data)
         {
-            // If shutting down, skip - OnDestroy handles cleanup
-            if (data.Cancellation.IsCancellationRequested)
-                return;
+            // Queue for release on main thread. If shutting down, the queue
+            // won't be processed but FMODManager.OnDestroy() handles cleanup.
+            _pendingRelease.Enqueue(data);
+        }
 
-            await Awaitable.MainThreadAsync();
-
-            if (data.Cancellation.IsCancellationRequested)
-                return;
-
-            data.Release();
+        /// <summary>
+        /// Processes pending user data releases. Called from FMODManager.Update().
+        /// </summary>
+        internal static void ProcessPendingReleases()
+        {
+            while (_pendingRelease.TryDequeue(out FMODUserData data))
+            {
+                if (!data.Cancellation.IsCancellationRequested)
+                {
+                    data.Release();
+                }
+            }
         }
         #endregion
     }

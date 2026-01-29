@@ -13,8 +13,6 @@ namespace FMODHelpers
     {
         #region Constants
         public const float MinBusVolume = 0.00001f;
-        public const float MaxVolumeDBs = 10f;
-        public const float MinVolumeDBs = -80f;
         public const string BusMaster = "bus:/";
         #endregion
 
@@ -72,6 +70,9 @@ namespace FMODHelpers
 
         void Update()
         {
+            // Process pending releases from FMOD callbacks
+            FMODNativeCallbackStudioEvent.ProcessPendingReleases();
+
             // Unload any banks that need unloading
             if (_banksPendingUnload.Count > 0)
             {
