@@ -5,7 +5,7 @@
     "name": "Short Sleeve Studio",
     "url": "https://github.com/ShortSleeveStudio/FMODHelpers"
   },
-  "version": "1.1.0",
+  "version": "1.1.1",
   "unity": "2023.1",
   "description": "Code that helped ease the use of FMOD in Voodoo Detective.",
   "hideInEditor": false,

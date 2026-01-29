@@ -22,6 +22,24 @@ namespace FMODHelpers
         }
 
         /// <summary>
+        /// Stops playback of an event instance and marks it for release.
+        /// Convenience method that combines Stop() and Release() operations.
+        /// Safe to call on invalid instances (will no-op).
+        /// </summary>
+        /// <param name="eventInstance">The event instance to stop and release</param>
+        /// <param name="immediate">If true, stops immediately. If false, allows fadeout to complete before releasing.</param>
+        public static void StopAndRelease(this EventInstance eventInstance, bool immediate)
+        {
+            if (eventInstance.isValid())
+            {
+                eventInstance.stop(
+                    immediate ? FMOD.Studio.STOP_MODE.IMMEDIATE : FMOD.Studio.STOP_MODE.ALLOWFADEOUT
+                );
+                eventInstance.release();
+            }
+        }
+
+        /// <summary>
         /// Pauses or unpauses an event instance.
         /// </summary>
         /// <param name="eventInstance">The event instance to pause/unpause</param>
