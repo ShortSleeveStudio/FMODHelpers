@@ -19,6 +19,7 @@ namespace FMODHelpers
         #region Static
         static Thread MainThread;
         public static bool IsMainThread => Thread.CurrentThread == MainThread;
+        public static bool IsShuttingDown { get; private set; }
         #endregion
 
         #region Inspector
@@ -70,8 +71,8 @@ namespace FMODHelpers
 
         void Update()
         {
-            // Process pending releases from FMOD callbacks
-            FMODNativeCallbackStudioEvent.ProcessPendingReleases();
+            // Process queued FMOD callbacks on main thread
+            FMODNativeCallbackStudioEvent.ProcessCallbacks();
 
             // Unload any banks that need unloading
             if (_banksPendingUnload.Count > 0)
@@ -95,8 +96,10 @@ namespace FMODHelpers
 
         void OnDestroy()
         {
-            // Stop and release all active event instances to prevent FMOD
-            // from waiting on managed callbacks during shutdown.
+            // Phase 1: Signal shutdown - callbacks will short-circuit
+            IsShuttingDown = true;
+
+            // Phase 2: Stop all active instances and unregister callbacks
             foreach (FMODUserData data in _activeUserData)
             {
                 if (data.CurrentInstance.isValid())
@@ -105,6 +108,16 @@ namespace FMODHelpers
                     data.CurrentInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
                     data.CurrentInstance.release();
                 }
+            }
+
+            // Phase 3: Flush FMOD's command buffer - safe because callbacks just enqueue and return
+            RuntimeManager.StudioSystem.flushCommands();
+
+            // Phase 4: Clear any remaining queued callbacks and free handles
+            FMODNativeCallbackStudioEvent.ClearQueue();
+
+            foreach (FMODUserData data in _activeUserData)
+            {
                 data.Handle.Free();
             }
             foreach (FMODUserData data in _inactiveUserData)
