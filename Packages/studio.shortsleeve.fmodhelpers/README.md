@@ -247,7 +247,7 @@ public class BankLoader : MonoBehaviour
     void UnloadMusicBank()
     {
         // Safe unload - will wait until all sounds from this bank finish
-        fmodManager.UnloadBankAsync("bank:/Music");
+        fmodManager.UnloadBankAsync("Music");
     }
 }
 ```

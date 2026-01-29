@@ -72,6 +72,9 @@ namespace FMODHelpers
 
         void Update()
         {
+            // Process pending releases from FMOD callbacks
+            FMODNativeCallbackStudioEvent.ProcessPendingReleases();
+
             // Unload any banks that need unloading
             if (_banksPendingUnload.Count > 0)
             {
@@ -127,8 +130,12 @@ namespace FMODHelpers
         /// Unloads an FMOD bank when it's safe to do so (no active instances from that bank).
         /// Bank unloading is deferred until all sounds from the bank have finished.
         /// </summary>
-        /// <param name="bankPath">Full bank path including "bank:/" prefix, e.g. "bank:/Music"</param>
-        public void UnloadBankAsync(string bankPath) => _banksPendingUnload.Add(bankPath);
+        /// <param name="bankName">Name of the bank (without "bank:/" prefix), e.g. "Music"</param>
+        public void UnloadBankAsync(string bankName)
+        {
+            string bankPath = bankName.StartsWith("bank:/") ? bankName : $"bank:/{bankName}";
+            _banksPendingUnload.Add(bankPath);
+        }
 
         /// <summary>
         /// Checks if any FMOD banks are currently loading sample data.
