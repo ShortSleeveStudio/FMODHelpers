@@ -9,6 +9,8 @@ using UnityEngine.Pool;
 
 namespace FMODHelpers
 {
+    // Run before RuntimeManager (default 0) so we initialize first and are destroyed last
+    [DefaultExecutionOrder(-1)]
     public class FMODManager : MonoBehaviour
     {
         #region Constants
@@ -103,13 +105,17 @@ namespace FMODHelpers
             FMODNativeCallbackStudioEvent.ClearQueue();
 
             // Phase 3: Stop all active instances and unregister callbacks
-            foreach (FMODUserData data in _activeUserData)
+            // Check if FMOD is still valid - RuntimeManager may have been destroyed first
+            if (RuntimeManager.StudioSystem.isValid())
             {
-                if (data.CurrentInstance.isValid())
+                foreach (FMODUserData data in _activeUserData)
                 {
-                    data.CurrentInstance.setCallback(null, 0);
-                    data.CurrentInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
-                    data.CurrentInstance.release();
+                    if (data.CurrentInstance.isValid())
+                    {
+                        data.CurrentInstance.setCallback(null, 0);
+                        data.CurrentInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+                        data.CurrentInstance.release();
+                    }
                 }
             }
 
@@ -283,18 +289,17 @@ namespace FMODHelpers
                 return eventInstance;
             }
 
-            // TODO: Re-enable callbacks after debugging hang on exit
-            // FMODUserData userData = TryGetUserData(eventRef);
-            // userData.CurrentInstance = eventInstance;
-            // eventInstance.setUserData(GCHandle.ToIntPtr(userData.Handle));
-            // eventInstance.setCallback(
-            //     FMODNativeCallbackStudioEvent.StudioEventCallbackInstance,
-            //     // There's cleanup we have to do for these guys so we always listen
-            //     EVENT_CALLBACK_TYPE.CREATE_PROGRAMMER_SOUND
-            //         | EVENT_CALLBACK_TYPE.DESTROY_PROGRAMMER_SOUND
-            //         | EVENT_CALLBACK_TYPE.DESTROYED
-            //         | callbacks
-            // );
+            FMODUserData userData = TryGetUserData(eventRef);
+            userData.CurrentInstance = eventInstance;
+            eventInstance.setUserData(GCHandle.ToIntPtr(userData.Handle));
+            eventInstance.setCallback(
+                FMODNativeCallbackStudioEvent.StudioEventCallbackInstance,
+                // There's cleanup we have to do for these guys so we always listen
+                EVENT_CALLBACK_TYPE.CREATE_PROGRAMMER_SOUND
+                    | EVENT_CALLBACK_TYPE.DESTROY_PROGRAMMER_SOUND
+                    | EVENT_CALLBACK_TYPE.DESTROYED
+                    | callbacks
+            );
             return eventInstance;
         }
 
