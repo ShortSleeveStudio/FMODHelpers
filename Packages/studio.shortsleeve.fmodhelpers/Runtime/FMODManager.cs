@@ -283,17 +283,18 @@ namespace FMODHelpers
                 return eventInstance;
             }
 
-            FMODUserData userData = TryGetUserData(eventRef);
-            userData.CurrentInstance = eventInstance;
-            eventInstance.setUserData(GCHandle.ToIntPtr(userData.Handle));
-            eventInstance.setCallback(
-                FMODNativeCallbackStudioEvent.StudioEventCallbackInstance,
-                // There's cleanup we have to do for these guys so we always listen
-                EVENT_CALLBACK_TYPE.CREATE_PROGRAMMER_SOUND
-                    | EVENT_CALLBACK_TYPE.DESTROY_PROGRAMMER_SOUND
-                    | EVENT_CALLBACK_TYPE.DESTROYED
-                    | callbacks
-            );
+            // TODO: Re-enable callbacks after debugging hang on exit
+            // FMODUserData userData = TryGetUserData(eventRef);
+            // userData.CurrentInstance = eventInstance;
+            // eventInstance.setUserData(GCHandle.ToIntPtr(userData.Handle));
+            // eventInstance.setCallback(
+            //     FMODNativeCallbackStudioEvent.StudioEventCallbackInstance,
+            //     // There's cleanup we have to do for these guys so we always listen
+            //     EVENT_CALLBACK_TYPE.CREATE_PROGRAMMER_SOUND
+            //         | EVENT_CALLBACK_TYPE.DESTROY_PROGRAMMER_SOUND
+            //         | EVENT_CALLBACK_TYPE.DESTROYED
+            //         | callbacks
+            // );
             return eventInstance;
         }
 
