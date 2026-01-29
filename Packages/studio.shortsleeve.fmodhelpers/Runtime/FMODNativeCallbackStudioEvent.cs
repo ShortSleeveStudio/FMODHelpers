@@ -44,107 +44,107 @@ namespace FMODHelpers
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.CREATED:
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnCreated(
+                        userData?.StudioEventCallbackHandler?.OnCreated(
                             FMODManager.IsMainThread,
                             userData
                         );
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.DESTROYED:
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnDestroyed(
+                        userData?.StudioEventCallbackHandler?.OnDestroyed(
                             FMODManager.IsMainThread,
                             userData
                         );
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     ReleaseUserData(userData);
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.STARTING:
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnStarting(
+                        userData?.StudioEventCallbackHandler?.OnStarting(
                             FMODManager.IsMainThread,
                             userData
                         );
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.STARTED:
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnStarted(
+                        userData?.StudioEventCallbackHandler?.OnStarted(
                             FMODManager.IsMainThread,
                             userData
                         );
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.RESTARTED:
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnRestarted(
+                        userData?.StudioEventCallbackHandler?.OnRestarted(
                             FMODManager.IsMainThread,
                             userData
                         );
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.STOPPED:
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnStopped(
+                        userData?.StudioEventCallbackHandler?.OnStopped(
                             FMODManager.IsMainThread,
                             userData
                         );
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.START_FAILED:
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnStartFailed(
+                        userData?.StudioEventCallbackHandler?.OnStartFailed(
                             FMODManager.IsMainThread,
                             userData
                         );
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.CREATE_PROGRAMMER_SOUND:
@@ -156,7 +156,7 @@ namespace FMODHelpers
                             );
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnCreateProgrammerSound(
+                        userData?.StudioEventCallbackHandler?.OnCreateProgrammerSound(
                             FMODManager.IsMainThread,
                             userData,
                             ref createProperties
@@ -164,9 +164,9 @@ namespace FMODHelpers
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     Marshal.StructureToPtr(createProperties, parameterPtr, false);
                     break;
@@ -179,7 +179,7 @@ namespace FMODHelpers
                             );
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnDestroyProgrammerSound(
+                        userData?.StudioEventCallbackHandler?.OnDestroyProgrammerSound(
                             FMODManager.IsMainThread,
                             userData,
                             ref destroyProperties
@@ -187,9 +187,9 @@ namespace FMODHelpers
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     new FMOD.Sound(destroyProperties.sound).release();
                     break;
@@ -202,7 +202,7 @@ namespace FMODHelpers
                             );
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnPluginCreated(
+                        userData?.StudioEventCallbackHandler?.OnPluginCreated(
                             FMODManager.IsMainThread,
                             userData,
                             ref pluginCreateProperties
@@ -210,9 +210,9 @@ namespace FMODHelpers
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.PLUGIN_DESTROYED:
@@ -224,7 +224,7 @@ namespace FMODHelpers
                             );
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnPluginDestroyed(
+                        userData?.StudioEventCallbackHandler?.OnPluginDestroyed(
                             FMODManager.IsMainThread,
                             userData,
                             ref pluginDestroyedProperties
@@ -232,9 +232,9 @@ namespace FMODHelpers
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.TIMELINE_MARKER:
@@ -246,7 +246,7 @@ namespace FMODHelpers
                             );
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnTimelineMarker(
+                        userData?.StudioEventCallbackHandler?.OnTimelineMarker(
                             FMODManager.IsMainThread,
                             userData,
                             ref markerParameter
@@ -254,9 +254,9 @@ namespace FMODHelpers
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.TIMELINE_BEAT:
@@ -268,7 +268,7 @@ namespace FMODHelpers
                             );
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnTimelineBeat(
+                        userData?.StudioEventCallbackHandler?.OnTimelineBeat(
                             FMODManager.IsMainThread,
                             userData,
                             ref beatProperties
@@ -276,9 +276,9 @@ namespace FMODHelpers
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.SOUND_PLAYED:
@@ -286,7 +286,7 @@ namespace FMODHelpers
                         Marshal.PtrToStructure(parameterPtr, typeof(FMOD.Sound));
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnSoundPlayed(
+                        userData?.StudioEventCallbackHandler?.OnSoundPlayed(
                             FMODManager.IsMainThread,
                             userData,
                             ref soundPlayed
@@ -294,9 +294,9 @@ namespace FMODHelpers
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.SOUND_STOPPED:
@@ -304,7 +304,7 @@ namespace FMODHelpers
                         Marshal.PtrToStructure(parameterPtr, typeof(FMOD.Sound));
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnSoundStopped(
+                        userData?.StudioEventCallbackHandler?.OnSoundStopped(
                             FMODManager.IsMainThread,
                             userData,
                             ref soundStopped
@@ -312,39 +312,39 @@ namespace FMODHelpers
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.REAL_TO_VIRTUAL:
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnRealToVirtual(
+                        userData?.StudioEventCallbackHandler?.OnRealToVirtual(
                             FMODManager.IsMainThread,
                             userData
                         );
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.VIRTUAL_TO_REAL:
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnVirtualToReal(
+                        userData?.StudioEventCallbackHandler?.OnVirtualToReal(
                             FMODManager.IsMainThread,
                             userData
                         );
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.START_EVENT_COMMAND:
@@ -352,7 +352,7 @@ namespace FMODHelpers
                         Marshal.PtrToStructure(parameterPtr, typeof(FMOD.Studio.EventInstance));
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnStartEventCommand(
+                        userData?.StudioEventCallbackHandler?.OnStartEventCommand(
                             FMODManager.IsMainThread,
                             userData,
                             ref startEvent
@@ -360,9 +360,9 @@ namespace FMODHelpers
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
                 case FMOD.Studio.EVENT_CALLBACK_TYPE.NESTED_TIMELINE_BEAT:
@@ -374,7 +374,7 @@ namespace FMODHelpers
                             );
                     try
                     {
-                        userData?.StudioEventCallbackHandler.OnNestedTimelineBeat(
+                        userData?.StudioEventCallbackHandler?.OnNestedTimelineBeat(
                             FMODManager.IsMainThread,
                             userData,
                             ref nestedProperties
@@ -382,9 +382,9 @@ namespace FMODHelpers
                     }
                     catch (Exception ex)
                     {
-                        #if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                         Debug.LogError($"Exception in FMOD callback: {ex}");
-                        #endif
+#endif
                     }
                     break;
             }
@@ -395,9 +395,15 @@ namespace FMODHelpers
         #region Callbacks
         static async void ReleaseUserData(FMODUserData data)
         {
-            await Awaitable.MainThreadAsync();
-            data.Cancellation.ThrowIfCancellationRequested();
-            data.Release();
+            try
+            {
+                await Awaitable.MainThreadAsync(data.Cancellation);
+                data.Release();
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected during shutdown - just return without releasing
+            }
         }
         #endregion
     }
